@@ -1,1 +1,1767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iMessage Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
+        body {
+            background-color: #f6f6f6;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 90%;
+            max-width: 400px;
+            height: 90vh;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            background: linear-gradient(to bottom, #128C7E, #075E54);
+            color: white;
+        }
+
+        .welcome-screen h1 {
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .welcome-buttons {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .welcome-button {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+            color: #075E54;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Account Creation Screen */
+        .account-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            background: linear-gradient(to bottom, #128C7E, #075E54);
+            color: white;
+        }
+
+        .account-form {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .form-button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .cancel-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .submit-button {
+            background-color: white;
+            color: #075E54;
+            font-weight: 600;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            background: linear-gradient(to bottom, #128C7E, #075E54);
+            color: white;
+        }
+
+        .login-form {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        /* Channel Selection Screen */
+        .channel-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .channel-header {
+            background-color: #128C7E;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .user-alias-display {
+            font-weight: 500;
+        }
+
+        .user-role {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-top: 2px;
+            padding: 1px 6px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            display: inline-block;
+        }
+
+        .role-owner {
+            background: linear-gradient(45deg, #ff6b6b, #ffa726);
+        }
+
+        .role-admin {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+
+        .alias-timer {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .alias-timer.warning {
+            color: #ff9500;
+        }
+
+        .alias-timer.expiring {
+            color: #ff3b30;
+        }
+
+        .alias-timer.renewable {
+            color: #4cd964;
+        }
+
+        .user-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: flex-end;
+        }
+
+        .lock-alias-button {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .lock-alias-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .admin-panel-button {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .logout-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .channel-list {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: white;
+        }
+
+        .channel-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .channel-item:last-child {
+            border-bottom: none;
+        }
+
+        .channel-name {
+            font-weight: 500;
+        }
+
+        .lock-icon {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .join-button {
+            width: calc(100% - 30px);
+            margin: 15px;
+            padding: 12px;
+            background-color: #128C7E;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .join-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Password Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .password-modal {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 300px;
+        }
+
+        .password-modal h3 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .modal-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Chat Screen */
+        .chat-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-header {
+            background-color: #128C7E;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .channel-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .channel-name-display {
+            font-weight: 500;
+        }
+
+        .online-count {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-left: 10px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #e5ddd5;
+            background-image: 
+                linear-gradient(rgba(229, 221, 213, 0.9), rgba(229, 221, 213, 0.9)),
+                repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(145, 181, 169, 0.1) 20px, rgba(145, 181, 169, 0.1) 21px);
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.sent {
+            background-color: #128C7E;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.received {
+            background-color: white;
+            color: black;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: rgba(0, 0, 0, 0.4);
+            text-align: right;
+            margin-top: 2px;
+        }
+
+        .message.sent .message-time {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .message-sender {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            opacity: 0.8;
+        }
+
+        .message-actions {
+            position: absolute;
+            top: -20px;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 5px;
+            display: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .message:hover .message-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .message-action {
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .delete-message {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-top: 1px solid #ddd;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .send-button {
+            background-color: #128C7E;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .send-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            color: #ff3b30;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            z-index: 1001;
+        }
+
+        .connected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .disconnected {
+            background-color: #f44336;
+            color: white;
+        }
+
+        /* Lock Alias Modal */
+        .lock-alias-modal {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .lock-alias-modal p {
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .renewal-info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .admin-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .admin-tab {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .admin-tab.active {
+            border-bottom-color: #128C7E;
+            color: #128C7E;
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .user-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .user-actions-admin {
+            display: flex;
+            gap: 5px;
+        }
+
+        .admin-action {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .make-admin {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .remove-admin {
+            background: #ffa726;
+            color: white;
+        }
+
+        .delete-user {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .mute-user {
+            background: #ff9500;
+            color: white;
+        }
+
+        .kick-user {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .ban-user {
+            background: #d32f2f;
+            color: white;
+        }
+
+        .channel-controls {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .permanent-alias {
+            color: #4cd964;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status disconnected" id="connectionStatus">Disconnected</div>
+    
+    <div class="app-container">
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <h1>iMessage Chat</h1>
+            <div class="welcome-buttons">
+                <button class="welcome-button" id="createAccountButton">Create Account</button>
+                <button class="welcome-button" id="loginButton">Login</button>
+            </div>
+        </div>
+
+        <!-- Account Creation Screen -->
+        <div class="account-screen" id="accountScreen">
+            <h1>Create Account</h1>
+            <div class="account-form">
+                <div class="input-group">
+                    <label for="aliasInput">Choose Alias (3-16 characters)</label>
+                    <input type="text" id="aliasInput" placeholder="Enter your alias">
+                    <div class="error-message" id="aliasError"></div>
+                </div>
+                <div class="input-group">
+                    <label for="passwordInput">Password (min 6 characters)</label>
+                    <input type="password" id="passwordInput" placeholder="Enter your password">
+                    <div class="error-message" id="passwordError"></div>
+                </div>
+                <div class="form-buttons">
+                    <button class="form-button cancel-button" id="cancelCreateAccount">Cancel</button>
+                    <button class="form-button submit-button" id="createAccount">Create Account</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Screen -->
+        <div class="login-screen" id="loginScreen">
+            <h1>Login</h1>
+            <div class="login-form">
+                <div class="input-group">
+                    <label for="loginAlias">Alias</label>
+                    <input type="text" id="loginAlias" placeholder="Enter your alias">
+                </div>
+                <div class="input-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password">
+                </div>
+                <div class="form-buttons">
+                    <button class="form-button cancel-button" id="cancelLogin">Back</button>
+                    <button class="form-button submit-button" id="loginAccount">Login</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Channel Selection Screen -->
+        <div class="channel-screen" id="channelScreen">
+            <div class="channel-header">
+                <div class="user-info">
+                    <button class="back-button" id="backFromChannels">←</button>
+                    <div>
+                        <div class="user-alias-display" id="userAliasDisplay">User</div>
+                        <div class="user-role" id="userRole"></div>
+                        <div class="alias-timer" id="aliasTimer">Alias expires in: 24h</div>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <button class="lock-alias-button" id="lockAliasButton">🔒 Lock Alias</button>
+                    <button class="admin-panel-button" id="adminPanelButton" style="display: none;">⚙️ Admin</button>
+                    <button class="logout-button" id="logoutButton">Logout</button>
+                </div>
+            </div>
+            <div class="channel-list" id="channelList">
+                <!-- Channels will be populated here -->
+            </div>
+            <button class="join-button" id="joinChannelButton" disabled>Join Channel</button>
+        </div>
+
+        <!-- Chat Screen -->
+        <div class="chat-screen" id="chatScreen">
+            <div class="chat-header">
+                <div class="channel-info">
+                    <button class="back-button" id="backFromChat">←</button>
+                    <div>
+                        <div class="channel-name-display" id="channelNameDisplay">Channel 1</div>
+                        <div class="online-count" id="onlineCount">0 online</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-area">
+                <input type="text" class="message-input" id="messageInput" placeholder="iMessage">
+                <button class="send-button" id="sendButton">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="white"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div class="modal-overlay" id="passwordModal" style="display: none;">
+        <div class="password-modal">
+            <h3 id="modalTitle">Enter Password</h3>
+            <input type="password" class="password-input" id="passwordInput" placeholder="Channel Password">
+            <div class="modal-buttons">
+                <button class="modal-button cancel-button" id="cancelPassword">Cancel</button>
+                <button class="modal-button submit-button" id="submitPassword">Join</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lock Alias Modal -->
+    <div class="modal-overlay" id="lockAliasModal" style="display: none;">
+        <div class="lock-alias-modal">
+            <h3>Lock Alias</h3>
+            <p id="lockAliasMessage">Locking your alias will prevent it from expiring for 90 days.</p>
+            <p class="renewal-info" id="renewalInfo" style="display: none;">
+                You can renew during the last 14 days to keep your alias active.
+            </p>
+            <div class="modal-buttons">
+                <button class="modal-button cancel-button" id="cancelLockAlias">Cancel</button>
+                <button class="modal-button submit-button" id="confirmLockAlias">Lock Alias</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div class="modal-overlay" id="adminPanelModal" style="display: none;">
+        <div class="admin-panel">
+            <h3>Admin Panel</h3>
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="users">Users</button>
+                <button class="admin-tab" data-tab="channels">Channels</button>
+                <button class="admin-tab" data-tab="moderation">Moderation</button>
+            </div>
+            
+            <div class="admin-section active" id="usersSection">
+                <h4>User Management</h4>
+                <div id="adminUserList">
+                    <!-- Users will be populated here -->
+                </div>
+            </div>
+            
+            <div class="admin-section" id="channelsSection">
+                <h4>Channel Management</h4>
+                <div id="adminChannelList">
+                    <!-- Channels will be populated here -->
+                </div>
+            </div>
+            
+            <div class="admin-section" id="moderationSection">
+                <h4>Moderation Tools</h4>
+                <div class="channel-controls">
+                    <h5>Current Channel: <span id="currentModChannel">None</span></h5>
+                    <div id="channelUserList">
+                        <!-- Channel users will be populated here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-button cancel-button" id="closeAdminPanel">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ChatApp {
+            constructor() {
+                this.socket = null;
+                this.currentUser = null;
+                this.currentChannel = null;
+                this.connected = false;
+                this.aliasLockTimer = null;
+                this.expiryTimer = null;
+                this.isAdmin = false;
+                this.isOwner = false;
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.connectWebSocket();
+            }
+
+            initializeElements() {
+                // Screens
+                this.welcomeScreen = document.getElementById('welcomeScreen');
+                this.accountScreen = document.getElementById('accountScreen');
+                this.loginScreen = document.getElementById('loginScreen');
+                this.channelScreen = document.getElementById('channelScreen');
+                this.chatScreen = document.getElementById('chatScreen');
+                
+                // Buttons
+                this.createAccountButton = document.getElementById('createAccountButton');
+                this.loginButton = document.getElementById('loginButton');
+                this.cancelCreateAccount = document.getElementById('cancelCreateAccount');
+                this.createAccount = document.getElementById('createAccount');
+                this.cancelLogin = document.getElementById('cancelLogin');
+                this.loginAccount = document.getElementById('loginAccount');
+                this.backFromChannels = document.getElementById('backFromChannels');
+                this.logoutButton = document.getElementById('logoutButton');
+                this.joinChannelButton = document.getElementById('joinChannelButton');
+                this.backFromChat = document.getElementById('backFromChat');
+                this.sendButton = document.getElementById('sendButton');
+                this.adminPanelButton = document.getElementById('adminPanelButton');
+                
+                // Inputs
+                this.aliasInput = document.getElementById('aliasInput');
+                this.passwordInput = document.getElementById('passwordInput');
+                this.loginAlias = document.getElementById('loginAlias');
+                this.loginPassword = document.getElementById('loginPassword');
+                this.messageInput = document.getElementById('messageInput');
+                
+                // Displays
+                this.userAliasDisplay = document.getElementById('userAliasDisplay');
+                this.userRole = document.getElementById('userRole');
+                this.channelList = document.getElementById('channelList');
+                this.channelNameDisplay = document.getElementById('channelNameDisplay');
+                this.chatMessages = document.getElementById('chatMessages');
+                this.onlineCount = document.getElementById('onlineCount');
+                this.connectionStatus = document.getElementById('connectionStatus');
+                this.aliasTimer = document.getElementById('aliasTimer');
+                this.lockAliasButton = document.getElementById('lockAliasButton');
+                
+                // Modals
+                this.passwordModal = document.getElementById('passwordModal');
+                this.modalTitle = document.getElementById('modalTitle');
+                this.passwordInputModal = document.getElementById('passwordInput');
+                this.cancelPassword = document.getElementById('cancelPassword');
+                this.submitPassword = document.getElementById('submitPassword');
+                
+                // Lock Alias Modal
+                this.lockAliasModal = document.getElementById('lockAliasModal');
+                this.lockAliasMessage = document.getElementById('lockAliasMessage');
+                this.renewalInfo = document.getElementById('renewalInfo');
+                this.cancelLockAlias = document.getElementById('cancelLockAlias');
+                this.confirmLockAlias = document.getElementById('confirmLockAlias');
+                
+                // Admin Panel
+                this.adminPanelModal = document.getElementById('adminPanelModal');
+                this.adminUserList = document.getElementById('adminUserList');
+                this.adminChannelList = document.getElementById('adminChannelList');
+                this.channelUserList = document.getElementById('channelUserList');
+                this.currentModChannel = document.getElementById('currentModChannel');
+                this.closeAdminPanel = document.getElementById('closeAdminPanel');
+            }
+
+            setupEventListeners() {
+                // Navigation
+                this.createAccountButton.addEventListener('click', () => this.showScreen('account'));
+                this.loginButton.addEventListener('click', () => this.showScreen('login'));
+                this.cancelCreateAccount.addEventListener('click', () => this.showScreen('welcome'));
+                this.cancelLogin.addEventListener('click', () => this.showScreen('welcome'));
+                this.backFromChannels.addEventListener('click', () => this.showScreen('login'));
+                this.logoutButton.addEventListener('click', () => this.logout());
+                this.backFromChat.addEventListener('click', () => this.leaveChannel());
+                
+                // Forms
+                this.createAccount.addEventListener('click', () => this.createAccountHandler());
+                this.loginAccount.addEventListener('click', () => this.loginHandler());
+                this.joinChannelButton.addEventListener('click', () => this.joinChannel());
+                
+                // Chat
+                this.messageInput.addEventListener('input', () => this.toggleSendButton());
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendMessage();
+                });
+                
+                // Modals
+                this.cancelPassword.addEventListener('click', () => this.closePasswordModal());
+                this.submitPassword.addEventListener('click', () => this.submitChannelPassword());
+                
+                // Alias locking
+                this.lockAliasButton.addEventListener('click', () => this.showLockAliasModal());
+                this.cancelLockAlias.addEventListener('click', () => this.closeLockAliasModal());
+                this.confirmLockAlias.addEventListener('click', () => this.lockAlias());
+                
+                // Admin panel
+                this.adminPanelButton.addEventListener('click', () => this.showAdminPanel());
+                this.closeAdminPanel.addEventListener('click', () => this.closeAdminPanelModal());
+                
+                // Admin tabs
+                document.querySelectorAll('.admin-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        const tabName = e.target.dataset.tab;
+                        this.switchAdminTab(tabName);
+                    });
+                });
+            }
+
+            connectWebSocket() {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}`;
+                
+                this.socket = new WebSocket(wsUrl);
+                
+                this.socket.onopen = () => {
+                    this.connected = true;
+                    this.connectionStatus.textContent = 'Connected';
+                    this.connectionStatus.className = 'connection-status connected';
+                    console.log('WebSocket connected');
+                    
+                    // Re-authenticate if we have a stored user
+                    const storedUser = localStorage.getItem('currentUser');
+                    if (storedUser) {
+                        this.currentUser = JSON.parse(storedUser);
+                        this.authenticateSocket();
+                    }
+                };
+                
+                this.socket.onclose = () => {
+                    this.connected = false;
+                    this.connectionStatus.textContent = 'Disconnected';
+                    this.connectionStatus.className = 'connection-status disconnected';
+                    console.log('WebSocket disconnected');
+                    
+                    // Try to reconnect after 3 seconds
+                    setTimeout(() => this.connectWebSocket(), 3000);
+                };
+                
+                this.socket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    this.handleSocketMessage(data);
+                };
+                
+                this.socket.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                };
+            }
+
+            handleSocketMessage(data) {
+                switch (data.type) {
+                    case 'auth_success':
+                        this.handleAuthSuccess(data);
+                        break;
+                    case 'auth_error':
+                        this.handleAuthError(data);
+                        break;
+                    case 'channels_list':
+                        this.renderChannels(data.channels);
+                        break;
+                    case 'channel_joined':
+                        this.handleChannelJoined(data);
+                        break;
+                    case 'channel_error':
+                        this.handleChannelError(data);
+                        break;
+                    case 'message':
+                        this.addMessage(data.message);
+                        break;
+                    case 'users_in_channel':
+                        this.updateOnlineCount(data.count);
+                        break;
+                    case 'channel_history':
+                        this.renderMessageHistory(data.messages);
+                        break;
+                    case 'user_list':
+                        this.renderAdminUserList(data.users);
+                        break;
+                    case 'channel_users':
+                        this.renderChannelUserList(data.users);
+                        break;
+                    case 'message_deleted':
+                        this.handleMessageDeleted(data.messageId);
+                        break;
+                    case 'user_kicked':
+                    case 'user_banned':
+                    case 'user_muted':
+                        this.handleUserModeration(data);
+                        break;
+                    case 'admin_status':
+                        this.handleAdminStatus(data);
+                        break;
+                }
+            }
+
+            showScreen(screen) {
+                this.welcomeScreen.style.display = 'none';
+                this.accountScreen.style.display = 'none';
+                this.loginScreen.style.display = 'none';
+                this.channelScreen.style.display = 'none';
+                this.chatScreen.style.display = 'none';
+                
+                switch (screen) {
+                    case 'welcome':
+                        this.welcomeScreen.style.display = 'flex';
+                        break;
+                    case 'account':
+                        this.accountScreen.style.display = 'flex';
+                        this.aliasInput.value = '';
+                        this.passwordInput.value = '';
+                        break;
+                    case 'login':
+                        this.loginScreen.style.display = 'flex';
+                        this.loginAlias.value = '';
+                        this.loginPassword.value = '';
+                        break;
+                    case 'channels':
+                        this.channelScreen.style.display = 'flex';
+                        this.requestChannels();
+                        break;
+                    case 'chat':
+                        this.chatScreen.style.display = 'flex';
+                        break;
+                }
+            }
+
+            async createAccountHandler() {
+                const alias = this.aliasInput.value.trim();
+                const password = this.passwordInput.value;
+                
+                if (alias.length < 3 || alias.length > 16) {
+                    this.showError('aliasError', 'Alias must be 3-16 characters');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    this.showError('passwordError', 'Password must be at least 6 characters');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ alias, password })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.currentUser = { 
+                            alias, 
+                            token: result.token,
+                            expiresAt: result.expiresAt,
+                            lockedUntil: result.lockedUntil,
+                            role: result.role
+                        };
+                        localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                        this.authenticateSocket();
+                        this.showScreen('channels');
+                        this.startExpiryTimer();
+                    } else {
+                        this.showError('aliasError', result.error || 'Registration failed');
+                    }
+                } catch (error) {
+                    this.showError('aliasError', 'Network error - please try again');
+                }
+            }
+
+            async loginHandler() {
+                const alias = this.loginAlias.value.trim();
+                const password = this.loginPassword.value;
+                
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ alias, password })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.currentUser = { 
+                            alias, 
+                            token: result.token,
+                            expiresAt: result.expiresAt,
+                            lockedUntil: result.lockedUntil,
+                            role: result.role
+                        };
+                        localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                        this.authenticateSocket();
+                        this.showScreen('channels');
+                        this.startExpiryTimer();
+                    } else {
+                        alert('Login failed: ' + (result.error || 'Invalid credentials'));
+                    }
+                } catch (error) {
+                    alert('Network error - please try again');
+                }
+            }
+
+            authenticateSocket() {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN && this.currentUser) {
+                    this.socket.send(JSON.stringify({
+                        type: 'authenticate',
+                        token: this.currentUser.token
+                    }));
+                }
+            }
+
+            requestChannels() {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({
+                        type: 'get_channels'
+                    }));
+                }
+            }
+
+            renderChannels(channels) {
+                this.channelList.innerHTML = '';
+                this.userAliasDisplay.textContent = this.currentUser.alias;
+                
+                channels.forEach(channel => {
+                    const channelItem = document.createElement('div');
+                    channelItem.className = 'channel-item';
+                    channelItem.innerHTML = `
+                        <span class="channel-name">${channel.name}</span>
+                        ${channel.requiresPassword ? '<span class="lock-icon">🔒</span>' : ''}
+                    `;
+                    
+                    channelItem.addEventListener('click', () => {
+                        document.querySelectorAll('.channel-item').forEach(item => {
+                            item.style.backgroundColor = '';
+                        });
+                        channelItem.style.backgroundColor = '#f0f0f0';
+                        this.currentChannel = channel;
+                        this.joinChannelButton.disabled = false;
+                    });
+                    
+                    this.channelList.appendChild(channelItem);
+                });
+            }
+
+            joinChannel() {
+                if (!this.currentChannel) return;
+                
+                if (this.currentChannel.requiresPassword) {
+                    this.showPasswordModal();
+                } else {
+                    this.joinChannelRequest();
+                }
+            }
+
+            showPasswordModal() {
+                this.modalTitle.textContent = `Enter password for ${this.currentChannel.name}`;
+                this.passwordInputModal.value = '';
+                this.passwordModal.style.display = 'flex';
+                this.passwordInputModal.focus();
+            }
+
+            closePasswordModal() {
+                this.passwordModal.style.display = 'none';
+            }
+
+            submitChannelPassword() {
+                const password = this.passwordInputModal.value;
+                this.joinChannelRequest(password);
+                this.closePasswordModal();
+            }
+
+            joinChannelRequest(password = null) {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({
+                        type: 'join_channel',
+                        channelId: this.currentChannel.id,
+                        password: password
+                    }));
+                }
+            }
+
+            handleChannelJoined(data) {
+                this.channelNameDisplay.textContent = data.channel.name;
+                this.showScreen('chat');
+                this.renderMessageHistory(data.history || []);
+            }
+
+            leaveChannel() {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN && this.currentChannel) {
+                    this.socket.send(JSON.stringify({
+                        type: 'leave_channel',
+                        channelId: this.currentChannel.id
+                    }));
+                }
+                this.currentChannel = null;
+                this.showScreen('channels');
+            }
+
+            sendMessage() {
+                const text = this.messageInput.value.trim();
+                if (!text || !this.currentChannel) return;
+                
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({
+                        type: 'send_message',
+                        channelId: this.currentChannel.id,
+                        text: text
+                    }));
+                    
+                    this.messageInput.value = '';
+                    this.toggleSendButton();
+                }
+            }
+
+            addMessage(message) {
+                const messageElement = document.createElement('div');
+                const isOwnMessage = message.sender === this.currentUser.alias;
+                
+                messageElement.className = `message ${isOwnMessage ? 'sent' : 'received'}`;
+                messageElement.dataset.messageId = message.id;
+                
+                const timeString = new Date(message.timestamp).toLocaleTimeString([], { 
+                    hour: '2-digit', minute: '2-digit' 
+                });
+                
+                let messageHTML = `
+                    ${!isOwnMessage ? `<div class="message-sender">${message.sender}</div>` : ''}
+                    <div>${message.text}</div>
+                    <div class="message-time">${timeString}</div>
+                `;
+                
+                // Add delete button for admins
+                if (this.isAdmin && !isOwnMessage) {
+                    messageHTML += `
+                        <div class="message-actions">
+                            <button class="message-action delete-message" onclick="chatApp.deleteMessage('${message.id}')">Delete</button>
+                        </div>
+                    `;
+                }
+                
+                messageElement.innerHTML = messageHTML;
+                this.chatMessages.appendChild(messageElement);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            renderMessageHistory(messages) {
+                this.chatMessages.innerHTML = '';
+                messages.forEach(message => this.addMessage(message));
+            }
+
+            updateOnlineCount(count) {
+                this.onlineCount.textContent = `${count} online`;
+            }
+
+            toggleSendButton() {
+                this.sendButton.disabled = !this.messageInput.value.trim();
+            }
+
+            // Alias Locking System
+            startExpiryTimer() {
+                // Clear existing timer
+                if (this.expiryTimer) {
+                    clearInterval(this.expiryTimer);
+                }
+
+                // Update timer every minute
+                this.expiryTimer = setInterval(() => {
+                    this.updateAliasTimerDisplay();
+                }, 60000);
+
+                // Initial update
+                this.updateAliasTimerDisplay();
+            }
+
+            updateAliasTimerDisplay() {
+                if (!this.currentUser || !this.currentUser.expiresAt) return;
+
+                const now = Date.now();
+                const expiresAt = new Date(this.currentUser.expiresAt).getTime();
+                const timeLeft = expiresAt - now;
+
+                if (timeLeft <= 0) {
+                    this.aliasTimer.textContent = 'Alias EXPIRED';
+                    this.aliasTimer.className = 'alias-timer expiring';
+                    this.lockAliasButton.disabled = true;
+                    this.handleAliasExpiry();
+                    return;
+                }
+
+                const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hoursLeft = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+
+                let displayText;
+                if (daysLeft > 0) {
+                    displayText = `Expires in: ${daysLeft}d ${hoursLeft}h`;
+                } else if (hoursLeft > 0) {
+                    displayText = `Expires in: ${hoursLeft}h ${minutesLeft}m`;
+                } else {
+                    displayText = `Expires in: ${minutesLeft}m`;
+                }
+
+                this.aliasTimer.textContent = displayText;
+
+                // Update styling based on time left
+                if (daysLeft <= 0 && hoursLeft < 2) {
+                    this.aliasTimer.className = 'alias-timer expiring';
+                } else if (daysLeft <= 0 || (daysLeft === 1 && hoursLeft < 12)) {
+                    this.aliasTimer.className = 'alias-timer warning';
+                } else if (this.canRenewAlias()) {
+                    this.aliasTimer.className = 'alias-timer renewable';
+                } else {
+                    this.aliasTimer.className = 'alias-timer';
+                }
+
+                // Update lock button state
+                this.updateLockButtonState();
+            }
+
+            canRenewAlias() {
+                if (!this.currentUser || !this.currentUser.lockedUntil) return false;
+                
+                const now = Date.now();
+                const lockedUntil = new Date(this.currentUser.lockedUntil).getTime();
+                const timeUntilExpiry = lockedUntil - now;
+                const daysUntilExpiry = timeUntilExpiry / (1000 * 60 * 60 * 24);
+                
+                return daysUntilExpiry <= 14;
+            }
+
+            updateLockButtonState() {
+                if (!this.currentUser) return;
+
+                const now = Date.now();
+                const lockedUntil = this.currentUser.lockedUntil ? new Date(this.currentUser.lockedUntil).getTime() : 0;
+                const canRenew = this.canRenewAlias();
+                
+                // Enable lock button if alias is not locked OR if it's in the renewal window
+                this.lockAliasButton.disabled = !canRenew && lockedUntil > now;
+                
+                if (lockedUntil > now) {
+                    const daysLeft = Math.ceil((lockedUntil - now) / (1000 * 60 * 60 * 24));
+                    if (canRenew) {
+                        this.lockAliasButton.textContent = `🔄 Renew (${daysLeft}d)`;
+                    } else {
+                        this.lockAliasButton.textContent = `🔒 Locked (${daysLeft}d)`;
+                    }
+                } else {
+                    this.lockAliasButton.textContent = '🔒 Lock Alias';
+                }
+            }
+
+            showLockAliasModal() {
+                const canRenew = this.canRenewAlias();
+                
+                if (canRenew) {
+                    this.lockAliasMessage.textContent = 'Renew your alias for another 90 days?';
+                    this.renewalInfo.style.display = 'block';
+                } else {
+                    this.lockAliasMessage.textContent = 'Locking your alias will prevent it from expiring for 90 days.';
+                    this.renewalInfo.style.display = 'none';
+                }
+                
+                this.lockAliasModal.style.display = 'flex';
+            }
+
+            closeLockAliasModal() {
+                this.lockAliasModal.style.display = 'none';
+            }
+
+            async lockAlias() {
+                if (!this.currentUser) return;
+
+                try {
+                    const response = await fetch('/api/lock-alias', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.currentUser.token}`
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Update user data with new expiry and lock info
+                        this.currentUser.expiresAt = result.expiresAt;
+                        this.currentUser.lockedUntil = result.lockedUntil;
+                        this.currentUser.token = result.token; // Update token if renewed
+                        localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                        
+                        this.closeLockAliasModal();
+                        this.updateAliasTimerDisplay();
+                        
+                        if (this.canRenewAlias()) {
+                            alert('Alias renewed successfully for 90 days!');
+                        } else {
+                            alert('Alias locked successfully for 90 days!');
+                        }
+                    } else {
+                        alert('Failed to lock alias: ' + (result.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    alert('Network error - please try again');
+                }
+            }
+
+            handleAliasExpiry() {
+                alert('Your alias has expired. Please log in again.');
+                this.logout();
+            }
+
+            logout() {
+                if (this.expiryTimer) {
+                    clearInterval(this.expiryTimer);
+                }
+                this.currentUser = null;
+                this.currentChannel = null;
+                localStorage.removeItem('currentUser');
+                this.showScreen('welcome');
+            }
+
+            handleAuthSuccess(data) {
+                console.log('Authentication successful');
+                this.userAliasDisplay.textContent = data.alias;
+                this.currentUser.expiresAt = data.expiresAt;
+                this.currentUser.lockedUntil = data.lockedUntil;
+                this.currentUser.role = data.role;
+                
+                this.isOwner = data.role === 'owner';
+                this.isAdmin = this.isOwner || data.role === 'admin';
+                
+                // Update role display
+                this.updateRoleDisplay();
+                
+                // Show/hide admin panel button
+                this.adminPanelButton.style.display = this.isAdmin ? 'block' : 'none';
+                
+                // Hide lock button for owner
+                if (this.isOwner) {
+                    this.lockAliasButton.style.display = 'none';
+                    this.aliasTimer.innerHTML = '<span class="permanent-alias">Permanent Alias</span>';
+                } else {
+                    this.startExpiryTimer();
+                }
+            }
+
+            updateRoleDisplay() {
+                if (this.isOwner) {
+                    this.userRole.textContent = 'OWNER';
+                    this.userRole.className = 'user-role role-owner';
+                } else if (this.isAdmin) {
+                    this.userRole.textContent = 'ADMIN';
+                    this.userRole.className = 'user-role role-admin';
+                } else {
+                    this.userRole.textContent = '';
+                    this.userRole.className = 'user-role';
+                }
+            }
+
+            showAdminPanel() {
+                if (!this.isAdmin) return;
+                
+                this.adminPanelModal.style.display = 'flex';
+                this.switchAdminTab('users');
+                this.requestUserList();
+            }
+
+            closeAdminPanelModal() {
+                this.adminPanelModal.style.display = 'none';
+            }
+
+            switchAdminTab(tabName) {
+                // Update tabs
+                document.querySelectorAll('.admin-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+                
+                // Update sections
+                document.querySelectorAll('.admin-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(`${tabName}Section`).classList.add('active');
+                
+                // Load data for the tab
+                if (tabName === 'users') {
+                    this.requestUserList();
+                } else if (tabName === 'moderation' && this.currentChannel) {
+                    this.currentModChannel.textContent = this.currentChannel.name;
+                    this.requestChannelUsers();
+                }
+            }
+
+            requestUserList() {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({
+                        type: 'get_user_list'
+                    }));
+                }
+            }
+
+            requestChannelUsers() {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN && this.currentChannel) {
+                    this.socket.send(JSON.stringify({
+                        type: 'get_channel_users',
+                        channelId: this.currentChannel.id
+                    }));
+                }
+            }
+
+            renderAdminUserList(users) {
+                this.adminUserList.innerHTML = '';
+                
+                users.forEach(user => {
+                    const userItem = document.createElement('div');
+                    userItem.className = 'user-list-item';
+                    
+                    const userInfo = document.createElement('div');
+                    userInfo.innerHTML = `
+                        <strong>${user.alias}</strong>
+                        <div style="font-size: 12px; color: #666;">
+                            Role: ${user.role} | 
+                            ${user.role === 'owner' ? 'Permanent' : `Expires: ${new Date(user.expiresAt).toLocaleDateString()}`}
+                        </div>
+                    `;
+                    
+                    const userActions = document.createElement('div');
+                    userActions.className = 'user-actions-admin';
+                    
+                    // Only owner can remove admins and delete users (except themselves)
+                    if (this.isOwner && user.role !== 'owner') {
+                        if (user.role === 'admin') {
+                            const removeAdminBtn = document.createElement('button');
+                            removeAdminBtn.className = 'admin-action remove-admin';
+                            removeAdminBtn.textContent = 'Remove Admin';
+                            removeAdminBtn.onclick = () => this.removeAdmin(user.alias);
+                            userActions.appendChild(removeAdminBtn);
+                        } else {
+                            const makeAdminBtn = document.createElement('button');
+                            makeAdminBtn.className = 'admin-action make-admin';
+                            makeAdminBtn.textContent = 'Make Admin';
+                            makeAdminBtn.onclick = () => this.makeAdmin(user.alias);
+                            userActions.appendChild(makeAdminBtn);
+                        }
+                        
+                        const deleteUserBtn = document.createElement('button');
+                        deleteUserBtn.className = 'admin-action delete-user';
+                        deleteUserBtn.textContent = 'Delete';
+                        deleteUserBtn.onclick = () => this.deleteUser(user.alias);
+                        userActions.appendChild(deleteUserBtn);
+                    }
+                    
+                    // Admins and owner can mute users
+                    if (user.role !== 'owner' && user.alias !== this.currentUser.alias) {
+                        const muteUserBtn = document.createElement('button');
+                        muteUserBtn.className = 'admin-action mute-user';
+                        muteUserBtn.textContent = user.isMuted ? 'Unmute' : 'Mute';
+                        muteUserBtn.onclick = () => this.toggleMuteUser(user.alias, !user.isMuted);
+                        userActions.appendChild(muteUserBtn);
+                    }
+                    
+                    userItem.appendChild(userInfo);
+                    userItem.appendChild(userActions);
+                    this.adminUserList.appendChild(userItem);
+                });
+            }
+
+            renderChannelUserList(users) {
+                this.channelUserList.innerHTML = '';
+                
+                users.forEach(user => {
+                    const userItem = document.createElement('div');
+                    userItem.className = 'user-list-item';
+                    
+                    userItem.innerHTML = `
+                        <div>
+                            <strong>${user.alias}</strong>
+                            <div style="font-size: 12px; color: #666;">
+                                Role: ${user.role}
+                                ${user.isMuted ? ' | 🔇 Muted' : ''}
+                            </div>
+                        </div>
+                        <div class="user-actions-admin">
+                            ${user.role !== 'owner' && user.alias !== this.currentUser.alias ? `
+                                <button class="admin-action kick-user" onclick="chatApp.kickUser('${user.alias}')">Kick</button>
+                                <button class="admin-action ban-user" onclick="chatApp.banUser('${user.alias}')">Ban</button>
+                                <button class="admin-action mute-user" onclick="chatApp.toggleMuteUser('${user.alias}', ${!user.isMuted})">
+                                    ${user.isMuted ? 'Unmute' : 'Mute'}
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    this.channelUserList.appendChild(userItem);
+                });
+            }
+
+            // Admin actions
+            makeAdmin(alias) {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({
+                        type: 'make_admin',
+                        alias: alias
+                    }));
+                }
+            }
+
+            removeAdmin(alias) {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({
+                        type: 'remove_admin',
+                        alias: alias
+                    }));
+                }
+            }
+
+            deleteUser(alias) {
+                if (confirm(`Are you sure you want to permanently delete user "${alias}"? This cannot be undone.`)) {
+                    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                        this.socket.send(JSON.stringify({
+                            type: 'delete_user',
+                            alias: alias
+                        }));
+                    }
+                }
+            }
+
+            kickUser(alias) {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN && this.currentChannel) {
+                    this.socket.send(JSON.stringify({
+                        type: 'kick_user',
+                        alias: alias,
+                        channelId: this.currentChannel.id
+                    }));
+                }
+            }
+
+            banUser(alias) {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN && this.currentChannel) {
+                    this.socket.send(JSON.stringify({
+                        type: 'ban_user',
+                        alias: alias,
+                        channelId: this.currentChannel.id
+                    }));
+                }
+            }
+
+            toggleMuteUser(alias, mute) {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({
+                        type: 'mute_user',
+                        alias: alias,
+                        mute: mute,
+                        channelId: this.currentChannel ? this.currentChannel.id : null
+                    }));
+                }
+            }
+
+            deleteMessage(messageId) {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({
+                        type: 'delete_message',
+                        messageId: messageId
+                    }));
+                }
+            }
+
+            handleMessageDeleted(messageId) {
+                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                    messageElement.innerHTML = '<em>This message was deleted by an admin.</em>';
+                    messageElement.style.opacity = '0.6';
+                }
+            }
+
+            handleUserModeration(data) {
+                if (data.alias === this.currentUser.alias) {
+                    if (data.type === 'user_kicked') {
+                        alert(`You have been kicked from ${data.channelName}`);
+                        this.leaveChannel();
+                    } else if (data.type === 'user_banned') {
+                        alert(`You have been banned from ${data.channelName}`);
+                        this.leaveChannel();
+                    } else if (data.type === 'user_muted') {
+                        alert(`You have been ${data.mute ? 'muted' : 'unmuted'} in ${data.channelName}`);
+                    }
+                }
+                
+                // Refresh user lists if admin panel is open
+                if (this.adminPanelModal.style.display === 'flex') {
+                    this.requestUserList();
+                    if (this.currentChannel) {
+                        this.requestChannelUsers();
+                    }
+                }
+            }
+
+            handleAdminStatus(data) {
+                if (data.alias === this.currentUser.alias) {
+                    this.isAdmin = data.isAdmin;
+                    this.isOwner = data.isOwner;
+                    this.updateRoleDisplay();
+                    this.adminPanelButton.style.display = this.isAdmin ? 'block' : 'none';
+                    
+                    if (data.action === 'removed') {
+                        alert('Your admin privileges have been removed.');
+                    }
+                }
+            }
+
+            handleAuthError(data) {
+                alert('Authentication failed: ' + data.error);
+                this.logout();
+            }
+
+            handleChannelError(data) {
+                alert('Channel error: ' + data.error);
+            }
+
+            showError(elementId, message) {
+                const errorElement = document.getElementById(elementId);
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+        }
+
+        // Initialize the app when the page loads
+        const chatApp = new ChatApp();
+    </script>
+</body>
+</html>
