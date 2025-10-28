@@ -65,8 +65,7 @@ Quick Local Setup
 
    You should see:
    "Server running on port 3000"
-   "Access the chat app at: http://localhost:3000"
-   "Owner account: uncleboof / owner123"
+   "Access the chat app at: http://localhost:3000
 
 6. ACCESS THE APP
    --------------
@@ -83,17 +82,6 @@ Quick Local Setup
 
 Default Accounts & Channels
 ===========================
-
-Owner Account:
-- Username: uncleboof
-- Password: owner123
-- Permanent alias (never expires)
-- Full admin privileges
-
-Password-Protected Channels:
-- Channel 3: "Private Group" - Password: secret123
-- Channel 7: "Admin Only" - Password: admin123
-- Channel 9: "VIP Lounge" - Password: vip456
 
 Regular Channels (no password):
 - Channel 1: General
